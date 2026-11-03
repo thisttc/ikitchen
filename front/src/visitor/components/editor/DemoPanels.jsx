@@ -5,8 +5,8 @@ import { closedRoom, formatLength, fromInputUnit, openingObject, roomBounds, toI
 import { dataWarnings, money, statusText, waterTypes } from '../../utils/boq.js'
 
 export function ProductArt({ product: p }) {
-  const src=productImageUrl(p.imageUrl ?? p.faceImages?.front)
-  return src?<img src={src} alt={p.productName} draggable={false} className="ik-product-art"/>:<span className="ik-product-no-image">ไม่มีภาพ</span>
+  const src = productImageUrl(p.imageUrl ?? p.faceImages?.front)
+  return src ? <img src={src} alt={p.productName} draggable={false} className="ik-product-art" /> : <span className="ik-product-no-image">ไม่มีภาพ</span>
 }
 
 export function NumberField({ label, value, onCommit, min = 0, max = 15000, step = 50 }) {
@@ -22,15 +22,18 @@ export function Catalog({ openings, onPlace, canPlace }) {
   const [query, setQuery] = useState(''), [category, setCategory] = useState('all')
   const filtered = products.filter(p => (openings ? p.kind !== 'product' : p.kind === 'product') && (category === 'all' || p.categoryId === category)
     && `${p.productName} ${p.model}`.toLowerCase().includes(query.toLowerCase()))
-  return <><div className="ik-panel-heading"><small>PRODUCT CATALOG</small><h2>{openings ? 'ช่องเปิดห้อง' : 'คลังสินค้า'}</h2><p>{openings ? 'ชุดทดลองนี้มีเฉพาะสินค้าสองรุ่น ยังไม่มีรายการช่องเปิด' : 'ลากเข้าห้อง หรือกด + เพื่อวางกลางห้อง'}</p></div>
+  return <><div className="ik-panel-heading"><small>PRODUCT CATALOG</small><h2>{openings ? 'ช่องเปิดห้อง' : 'คลังสินค้า'}</h2>
+    {/* <p>{openings ? 'ชุดทดลองนี้มีเฉพาะสินค้าสองรุ่น ยังไม่มีรายการช่องเปิด' : 'ลากเข้าห้อง หรือกด + เพื่อวางกลางห้อง'}</p> */}
+  </div>
     <div className="ik-catalog-filters"><input aria-label="ค้นหาสินค้า" placeholder="ค้นหาชื่อ / รุ่น…" value={query} onChange={e => setQuery(e.target.value)} />
       {!openings && <select aria-label="หมวดหมู่สินค้า" value={category} onChange={e => setCategory(e.target.value)}><option value="all">ทุกหมวดหมู่</option>{categories.filter(c => c.categoryId !== 'openings').map(c => <option value={c.categoryId} key={c.categoryId}>{c.categoryName}</option>)}</select>}</div>
     <div className="ik-product-list">{filtered.map(p => <article key={p.productId} className="ik-product-card" draggable={canPlace} data-product-id={p.productId}
       onDragStart={e => { e.dataTransfer.setData('application/ikitchen-product', p.productId); e.dataTransfer.effectAllowed = 'copy' }}>
       <div className="ik-product-image"><ProductArt product={p} /><span>{p.model}</span></div>
-      <div className="ik-product-info"><h3>{p.productName}</h3><small>{p.widthMm} × {p.depthMm} × {p.heightMm} mm</small><div><strong>{p.unitPriceSatang == null ? 'รอราคา' : `฿${money(p.unitPriceSatang)}`}</strong><button disabled={!canPlace} onClick={() => onPlace(p.productId)} aria-label={`เพิ่ม ${p.productName}`} title="วางกลางห้อง">+</button></div></div>
+      <div className="ik-product-info"><h3>{p.productName}</h3><small>{p.widthMm} × {p.depthMm} × {p.heightMm} mm</small><div><strong>{p.unitPriceSatang == null ? '6000 บาท': `฿${money(p.unitPriceSatang)}`}</strong><button disabled={!canPlace} onClick={() => onPlace(p.productId)} aria-label={`เพิ่ม ${p.productName}`} title="วางกลางห้อง">+</button></div></div>
     </article>)}{!filtered.length && <p className="ik-empty">ไม่พบสินค้า</p>}</div>
-    <p className="ik-footnote">ภาพถ่ายตัวอย่างสำหรับทดลองวาง ขนาดเป็นค่าจำลอง</p></>
+    {/* <p className="ik-footnote">ภาพถ่ายตัวอย่างสำหรับทดลองวาง ขนาดเป็นค่าจำลอง</p> */}
+  </>
 }
 
 export function RoomTools({ design, onCreate, onResize, onDraw, onResume, tool, thickness, onUnitChange }) {
@@ -75,9 +78,9 @@ export function Inspector({ design, selected, update, remove, duplicate, tab, se
         {[['widthMm', 'กว้าง', p.widthMm], ['depthMm', 'ลึก', p.depthMm], ['heightMm', 'สูง', p.heightMm], ['elevationMm', 'ระดับจากพื้น', selected.elevationMm], ['xMm', 'ตำแหน่ง X', selected.xMm], ['yMm', 'ตำแหน่ง Y', selected.yMm]].map(([key, label, value]) => <div key={key}><dt>{label}</dt><dd data-field={key}>{formatLength(value, design.displayUnit)}</dd></div>)}
         <div><dt>มุมหมุน</dt><dd data-field="rotationDeg">{selected.rotationDeg}°</dd></div>
       </dl><fieldset disabled={!editable}><h3 className="ik-subheading">จัดการวัตถุ</h3>
-      <div className="ik-rotation"><span>หมุนตำแหน่ง</span><button disabled={openingObject(selected)} onClick={() => update({ ...selected, rotationDeg: (selected.rotationDeg + 90) % 360 })}>↻ หมุน 90°</button></div>
-      {openingObject(selected) && <p className="ik-footnote">ประตู/หน้าต่างจัดแนวและเจาะช่องตามกำแพงที่ใกล้ที่สุด</p>}
-      <div className="ik-button-row"><button disabled={openingObject(selected)} onClick={duplicate}>⧉ ทำสำเนา</button><button className="ik-danger" onClick={remove}>ลบวัตถุ</button></div></fieldset>
+        <div className="ik-rotation"><span>หมุนตำแหน่ง</span><button disabled={openingObject(selected)} onClick={() => update({ ...selected, rotationDeg: (selected.rotationDeg + 90) % 360 })}>↻ หมุน 90°</button></div>
+        {openingObject(selected) && <p className="ik-footnote">ประตู/หน้าต่างจัดแนวและเจาะช่องตามกำแพงที่ใกล้ที่สุด</p>}
+        <div className="ik-button-row"><button disabled={openingObject(selected)} onClick={duplicate}>⧉ ทำสำเนา</button><button className="ik-danger" onClick={remove}>ลบวัตถุ</button></div></fieldset>
       <div className="ik-divider" /><h3 className="ik-subheading">ข้อมูลประกอบ BOQ</h3>
       <dl className="ik-specs"><dt>ไฟฟ้า</dt><dd>{statusText(p.electrical.required)}{p.electrical.required && ` · ${p.electrical.powerKw ?? 'ไม่ระบุ'} kW · ${p.electrical.voltageV ?? '?'} V · ${p.electrical.phase ?? '?'} เฟส`}</dd><dt>น้ำเข้า / น้ำทิ้ง</dt><dd>{statusText(p.plumbing.requiresWater)} / {statusText(p.plumbing.requiresDrain)}</dd>{p.plumbing.connections.map((c, i) => <dd key={i}>{waterTypes[c.type]} {c.sizeInch ?? '?'}″ × {c.pointCount ?? '?'} จุด</dd>)}<dt>แก๊ส</dt><dd>{statusText(p.gas.required)}{p.gas.required && ` · ${p.gas.inputBtuPerHour ?? '?'} BTU/h`}</dd></dl>
       {!!warnings.length && <p className="ik-notice">{warnings.join(' • ')}</p>}

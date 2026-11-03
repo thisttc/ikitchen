@@ -22,31 +22,53 @@ export default function SceneCanvas({design,view,setView,camera,setCamera,tool,s
     return {x:(x-transform.x)/transform.scale,y:(y-transform.y)/transform.scale}
   }
   function world(event){const p=local(event);return unprojectFloor(p.x,p.y,view,camera)}
-  function start(event){
-    if(event.button!==0&&event.button!==1)return
-    const stage=stageRef.current;stage.setPointersPositions(event)
-    const hit=stage.getIntersection(stage.getPointerPosition()),group=hit?.findAncestor('.product-face',true)
-    const object=design.objects.find(o=>o.objectId===group?.getAttr('objectId'))
-    if(object)select(object.objectId);else if(!event.shiftKey)select(null)
-    if(view==='isometric'&&(!object||event.shiftKey||event.button===1)){
-      drag.current={kind:'orbit',at:{x:event.clientX,y:event.clientY},camera:normalizeCamera(camera)};setOrbiting(true)
-    }else{
-      if(event.button!==0||!isEditable(view))return
-      const at=world(event)
-      if(object&&tool==='select')drag.current={kind:'object',object,at}
-      else if(!object&&view==='top'&&['rectangle','wall'].includes(tool)){
-        drag.current={kind:tool,at:{x:snap(at.x),y:snap(at.y)}}
-        liveDraft.current={start:drag.current.at,end:drag.current.at};setDraft(liveDraft.current)
-      }else return
+function start(event) {
+  if (event.button !== 0) return
+
+  const stage = stageRef.current
+  stage.setPointersPositions(event)
+
+  const hit = stage.getIntersection(stage.getPointerPosition())
+  const group = hit?.findAncestor('.product-face', true)
+
+  const object = design.objects.find(
+    o => o.objectId === group?.getAttr('objectId')
+  )
+
+  if (object) select(object.objectId)
+  else if (!event.shiftKey) select(null)
+
+  if (!isEditable(view)) return
+
+  const at = world(event)
+
+  if (object && tool === 'select') {
+    drag.current = { kind: 'object', object, at }
+  } else if (
+    !object &&
+    view === 'top' &&
+    ['rectangle', 'wall'].includes(tool)
+  ) {
+    drag.current = {
+      kind: tool,
+      at: { x: snap(at.x), y: snap(at.y) }
     }
-    event.preventDefault();hostRef.current.setPointerCapture(event.pointerId)
+
+    liveDraft.current = {
+      start: drag.current.at,
+      end: drag.current.at
+    }
+
+    setDraft(liveDraft.current)
+  } else {
+    return
   }
+
+  event.preventDefault()
+  hostRef.current.setPointerCapture(event.pointerId)
+}
   function move(event){
     const d=drag.current;if(!d)return
-    if(d.kind==='orbit'){
-      // Inverted mouse direction requested by the user.
-      setCamera(normalizeCamera({azimuthDeg:d.camera.azimuthDeg-(event.clientX-d.at.x)*.4,elevationDeg:d.camera.elevationDeg+(event.clientY-d.at.y)*.25}));return
-    }
     const at=world(event)
     if(d.kind==='object'){
       const x=d.object.xMm+at.x-d.at.x,y=d.object.yMm+at.y-d.at.y
@@ -79,7 +101,7 @@ export default function SceneCanvas({design,view,setView,camera,setCamera,tool,s
   const turn=delta=>setCamera(c=>normalizeCamera({...c,azimuthDeg:c.azimuthDeg+delta}))
   return <section className={`ik-workspace ${over?'ik-drop-over':''}`} aria-label="พื้นที่ออกแบบ">
     <div className="ik-canvas-toolbar"><div className="ik-view-tabs">{views.map(([id,name])=><button key={id} aria-pressed={view===id} onClick={()=>{if(drag.current)return;setView(id);setZoom(1)}}>{name}</button>)}</div></div>
-    {view==='isometric'&&<div className="ik-orbit-controls" aria-label="ควบคุมมุมมองรอบห้อง"><button aria-label="หมุนมุมมองซ้าย" title="หมุนมุมมองซ้าย 45°" onClick={()=>turn(-45)}>↶</button><span data-testid="camera-angle">{Math.round(camera.azimuthDeg)}° · ก้ม {Math.round(camera.elevationDeg)}°</span><button aria-label="หมุนมุมมองขวา" title="หมุนมุมมองขวา 45°" onClick={()=>turn(45)}>↷</button><button onClick={reset}>รีเซ็ตมุม</button></div>}
+    {/* {view==='isometric'&&<div className="ik-orbit-controls" aria-label="ควบคุมมุมมองรอบห้อง"><button aria-label="หมุนมุมมองซ้าย" title="หมุนมุมมองซ้าย 45°" onClick={()=>turn(-45)}>↶</button><span data-testid="camera-angle">{Math.round(camera.azimuthDeg)}° · ก้ม {Math.round(camera.elevationDeg)}°</span><button aria-label="หมุนมุมมองขวา" title="หมุนมุมมองขวา 45°" onClick={()=>turn(45)}>↷</button><button onClick={reset}>รีเซ็ตมุม</button></div>} */}
     <div ref={hostRef} data-testid="scene" data-renderer="react-konva" role="application" aria-label="Canvas ออกแบบห้องครัว" className={`ik-scene ik-konva-host ik-tool-${tool} ${orbiting?'is-orbiting':''}`}
       onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={cancel} onLostPointerCapture={cancel}
       onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect=isEditable(view)?'copy':'none';setOver(true)}} onDragLeave={()=>setOver(false)}
@@ -92,6 +114,6 @@ export default function SceneCanvas({design,view,setView,camera,setCamera,tool,s
         </Group></Layer>
       </Stage>
     </div>
-    <div className="ik-canvas-bottom"><span>{closed?'พร้อมออกแบบ':room.walls.length?'ห้องยังไม่ปิด':'ยังไม่มีห้อง'} · กริด {formatLength(500,design.displayUnit)}</span><div className="ik-zoom"><button aria-label="ซูมออก" onClick={()=>setZoom(z=>Math.max(.5,z-.15))}>−</button><button onClick={()=>setZoom(1)} title="พอดีหน้าจอ">{Math.round(zoom*100)}%</button><button aria-label="ซูมเข้า" onClick={()=>setZoom(z=>Math.min(2.5,z+.15))}>+</button></div></div>
+    {/* <div className="ik-canvas-bottom"><span>{closed?'พร้อมออกแบบ':room.walls.length?'ห้องยังไม่ปิด':'ยังไม่มีห้อง'} · กริด {formatLength(500,design.displayUnit)}</span><div className="ik-zoom"><button aria-label="ซูมออก" onClick={()=>setZoom(z=>Math.max(.5,z-.15))}>−</button><button onClick={()=>setZoom(1)} title="พอดีหน้าจอ">{Math.round(zoom*100)}%</button><button aria-label="ซูมเข้า" onClick={()=>setZoom(z=>Math.min(2.5,z+.15))}>+</button></div></div> */}
   </section>
 }

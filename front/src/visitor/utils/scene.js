@@ -5,12 +5,13 @@ export const snap = (v, grid = 50) => Math.round(v / grid) * grid
 export const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 export const views = [['top', 'มุมบน'], ['isometric', 'Isometric'], ['front', 'ด้านหน้า'], ['back', 'ด้านหลัง'], ['left', 'ด้านซ้าย'], ['right', 'ด้านขวา'], ['bottom', 'มุมล่าง']]
 export const isEditable = (view) => ['top', 'isometric'].includes(view)
-export const DEFAULT_ISOMETRIC_CAMERA = Object.freeze({ azimuthDeg: 45, elevationDeg: Math.atan(1 / Math.sqrt(2)) * 180 / Math.PI })
+export const DEFAULT_ISOMETRIC_CAMERA = Object.freeze({
+  azimuthDeg: 30,
+  elevationDeg: 30
+})
 export const ISO_SCALE = Math.sqrt(3 / 2)
-export function normalizeCamera(camera = DEFAULT_ISOMETRIC_CAMERA) {
-  const azimuth = Number.isFinite(camera?.azimuthDeg) ? camera.azimuthDeg : DEFAULT_ISOMETRIC_CAMERA.azimuthDeg
-  const elevation = Number.isFinite(camera?.elevationDeg) ? camera.elevationDeg : DEFAULT_ISOMETRIC_CAMERA.elevationDeg
-  return { azimuthDeg: ((azimuth % 360) + 360) % 360, elevationDeg: clamp(elevation, 15, 70) }
+export function normalizeCamera() {
+  return { ...DEFAULT_ISOMETRIC_CAMERA }
 }
 export function cameraBasis(camera) {
   const c = normalizeCamera(camera), a = c.azimuthDeg * Math.PI / 180, e = c.elevationDeg * Math.PI / 180
