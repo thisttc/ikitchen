@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Sarabun", sans-serif;
+  --color-brand-50: #f4f7f1;
+  --color-brand-100: #e5ebdf;
+  --color-brand-200: #cad7c0;
+  --color-brand-500: #64785a;
+  --color-brand-600: #4f6147;
+  --color-brand-700: #3f4e39;
+  --color-canvas: #f8f5ec;
+  --color-sand: #c7b496;
+}
+
+:root {
+  font-family: "Sarabun", sans-serif;
+  color: #252a23;
+  background: #f8f5ec;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 1180px;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c8cfc3 transparent;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c8cfc3;
+}
+
+.canvas-grid {
+  background-color: #f8f5ec;
+  background-image:
+    linear-gradient(rgba(79, 97, 71, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 97, 71, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(79, 97, 71, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 97, 71, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px, 48px 48px, 12px 12px, 12px 12px;
+}
+
+.room-isometric {
+  transform: rotateX(58deg) rotateZ(-35deg);
+  transform-style: preserve-3d;
+}
+
+.soft-enter {
+  animation: soft-enter 180ms ease-out;
+}
+
+@keyframes soft-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

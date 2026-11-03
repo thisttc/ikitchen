@@ -1,0 +1,36 @@
+[
+  {
+    "productId": "sample-fridge",
+    "productName": "ตู้เย็น",
+    "categoryId": "samples",
+    "model": "PHOTO-A",
+    "widthMm": 700,
+    "depthMm": 650,
+    "heightMm": 1600,
+    "faceImages": {
+      "front": "fridge/front.jpg",
+      "right": "fridge/right.jpg",
+      "back": "fridge/back.jpg",
+      "left": "fridge/left.jpg",
+      "top": "fridge/top.jpg",
+      "bottom": "fridge/bottom.jpg"
+    }
+  },
+  {
+    "productId": "sample-cabinet",
+    "productName": "ตู้เก็บของ",
+    "categoryId": "samples",
+    "model": "PHOTO-B",
+    "widthMm": 900,
+    "depthMm": 500,
+    "heightMm": 1100,
+    "faceImages": {
+      "front": "cabinet/front.jpg",
+      "right": "cabinet/right.jpg",
+      "back": "cabinet/back.jpg",
+      "left": "cabinet/left.jpg",
+      "top": "cabinet/top.jpg",
+      "bottom": "cabinet/bottom.jpg"
+    }
+  }
+]
